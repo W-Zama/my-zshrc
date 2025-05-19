@@ -1,32 +1,41 @@
+# Locale settings
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+
+# Aliases
 alias ll='ls -l'
 alias la='ls -a'
 
-# fzf history
-function fzf-select-history() {
-    BUFFER=$(history -n -r 1 | fzf --query "$LBUFFER" --reverse)
-    CURSOR=$#BUFFER
-    zle reset-prompt
-}
-zle -N fzf-select-history
-bindkey '^r' fzf-select-history
+# zplug installation check
+if [[ ! -d ~/.zplug ]]; then
+    git clone https://github.com/zplug/zplug ~/.zplug
+fi
 
-#zplugの読み込み
+# --- zplug setup ---
+
+# zplugを初期化（'zplug'コマンドを使えるようにする）
 source ~/.zplug/init.zsh
-#zplugをzplug自身で管理
-zplug 'zplug/zplug', hook-build:'zplug --self-manage'
-#ここに他のプラグインについて設定する
+
+# zplug自身とプラグインの宣言
+zplug "zplug/zplug", hook-build:'zplug --self-manage'
 zplug "zsh-users/zsh-autosuggestions", as:plugin
 zplug "zsh-users/zsh-syntax-highlighting", as:plugin
-zplug "zsh-users/zsh-completions", as:plugin
-# 未インストール項目をインストールする
+
+# プラグインがインストールされていなければインストールする
 if ! zplug check --verbose; then
-    printf "インストールしますか? [y/N]: "
+    printf "Install plugins? [y/N]: "
     if read -q; then
-        echo; zplug install
+        echo
+        zplug install
+        source ~/.zshrc
     fi
 fi
-# コマンドをリンクして、PATH に追加し、プラグインは読み込む
+
+# インストールされたプラグインを読み込む
 zplug load --verbose
+
+# --- End of zplug setup ---
 
 export PATH=$HOME/development/flutter/bin:$PATH
 export PATH=$PATH:$(go env GOPATH)/bin
